@@ -1,0 +1,213 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Hotel Search API",
+    "description": "Hotel Search API PoC — CRUD, search, and health endpoints.\n\n**Collection variables**\n- `baseUrl` — API root (override via environment)\n- `apiKey` — `X-Api-Key` for write operations when `ApiKey__WriteKey` is configured\n- `hotelId` — set automatically after **Create hotel** (workflow helper)\n\nImport with [HotelSearch.local.postman_environment.json](HotelSearch.local.postman_environment.json).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5103",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "hotelId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "description": "Operational health check (PostgreSQL connectivity).",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Returns `200` with `{ \"status\": \"healthy\", \"database\": \"healthy\" }` when PostgreSQL is reachable."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Hotel CRUD",
+      "description": "Create, read, update, and delete hotels. Write operations require `X-Api-Key` when API key auth is enabled.",
+      "item": [
+        {
+          "name": "Create hotel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.id) {",
+                  "        pm.collectionVariables.set('hotelId', body.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Api-Key",
+                "value": "{{apiKey}}",
+                "description": "Required when ApiKey__WriteKey is configured"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grand Hotel Zagreb\",\n  \"price\": 120,\n  \"latitude\": 45.8150,\n  \"longitude\": 15.9819\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/hotels",
+            "description": "Creates a hotel. Returns `201 Created` with body and `Location` header."
+          },
+          "response": []
+        },
+        {
+          "name": "Get hotels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hotels",
+            "description": "Returns all hotels as a JSON array."
+          },
+          "response": []
+        },
+        {
+          "name": "Get hotel by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hotels/{{hotelId}}",
+            "description": "Returns a single hotel. Run **Create hotel** first to set `hotelId`, or paste a GUID into collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Update hotel",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Api-Key",
+                "value": "{{apiKey}}",
+                "description": "Required when ApiKey__WriteKey is configured"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grand Hotel Zagreb (Updated)\",\n  \"price\": 135,\n  \"latitude\": 45.8150,\n  \"longitude\": 15.9819\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/hotels/{{hotelId}}",
+            "description": "Updates an existing hotel. Returns `204 No Content` on success."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete hotel",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Api-Key",
+                "value": "{{apiKey}}",
+                "description": "Required when ApiKey__WriteKey is configured"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hotels/{{hotelId}}",
+            "description": "Deletes a hotel by ID. Returns `204 No Content` on success."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "description": "Natural-language search with paging. Public endpoint — no API key required.",
+      "item": [
+        {
+          "name": "Search hotels",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"near 45.8150, 15.9819 under 200\",\n  \"page\": 1,\n  \"pageSize\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/hotels/search",
+            "description": "Searches and ranks hotels by price and distance.\n\nExample prompts:\n- `near 45.8150, 15.9819`\n- `near 45.8150, 15.9819 under 200`\n- `location 45.8150, 15.9819 max price 150`"
+          },
+          "response": []
+        },
+        {
+          "name": "Search hotels (pagination)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"near 45.8150, 15.9819\",\n  \"page\": 2,\n  \"pageSize\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/hotels/search",
+            "description": "Search with paging — page 2, five results per page."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

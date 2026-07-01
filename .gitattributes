@@ -1,0 +1,54 @@
+# Normalize line endings across platforms.
+* text=auto
+
+# Source code
+*.cs     text diff=csharp
+*.csx    text diff=csharp
+*.vb     text diff=vb
+*.fs     text diff=fsharp
+
+# Projects and solutions
+*.csproj text
+*.props  text
+*.targets text
+*.sln    text eol=crlf
+*.slnx   text eol=crlf
+
+# Config and docs
+*.json   text
+*.md     text
+*.yml    text
+*.yaml   text
+*.xml    text
+*.config text
+*.editorconfig text
+*.gitattributes text
+*.gitignore text
+
+# Shell scripts (keep LF)
+*.sh     text eol=lf
+
+# Windows scripts (keep CRLF)
+*.cmd    text eol=crlf
+*.bat    text eol=crlf
+*.ps1    text eol=crlf
+
+# Binary assets
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.pdf    binary
+*.zip    binary
+*.dll    binary
+*.exe    binary
+*.pdb    binary
+
+# Docker
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+
+# Linguist overrides (optional clarity for GitHub)
+*.csproj linguist-detectable=false
+*.sln linguist-detectable=false

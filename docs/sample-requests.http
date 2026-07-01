@@ -1,0 +1,110 @@
+# Hotel Search API — sample requests
+# VS Code: install "REST Client" (humao.rest-client), open this file, click "Send Request".
+#
+# Prerequisites: API running locally (dotnet run) or via Docker Compose.
+# Default base URL matches local `dotnet run` (port 5103). For Docker Compose, change to http://localhost:8080.
+
+@baseUrl = http://localhost:5103
+@apiKey =
+@hotelId = 00000000-0000-0000-0000-000000000001
+
+### Health check
+GET {{baseUrl}}/health
+
+###
+
+### Create Hotel
+# @name createHotel
+POST {{baseUrl}}/api/hotels
+Content-Type: application/json
+X-Api-Key: {{apiKey}}
+
+{
+  "name": "Grand Hotel Zagreb",
+  "price": 120,
+  "latitude": 45.8150,
+  "longitude": 15.9819
+}
+
+###
+
+# Use id from Create Hotel response (run Create Hotel first), or set @hotelId manually above.
+@hotelId = {{createHotel.response.body.id}}
+
+### Get Hotels
+GET {{baseUrl}}/api/hotels
+
+###
+
+### Get Hotel by Id
+GET {{baseUrl}}/api/hotels/{{hotelId}}
+
+###
+
+### Update Hotel
+PUT {{baseUrl}}/api/hotels/{{hotelId}}
+Content-Type: application/json
+X-Api-Key: {{apiKey}}
+
+{
+  "name": "Grand Hotel Zagreb (Updated)",
+  "price": 135,
+  "latitude": 45.8150,
+  "longitude": 15.9819
+}
+
+###
+
+### Delete Hotel
+DELETE {{baseUrl}}/api/hotels/{{hotelId}}
+X-Api-Key: {{apiKey}}
+
+###
+
+### Search Hotels
+POST {{baseUrl}}/api/hotels/search
+Content-Type: application/json
+
+{
+  "prompt": "near 45.8150, 15.9819 under 200",
+  "page": 1,
+  "pageSize": 10
+}
+
+###
+
+### Search Hotels — pagination (page 2, smaller page size)
+POST {{baseUrl}}/api/hotels/search
+Content-Type: application/json
+
+{
+  "prompt": "near 45.8150, 15.9819",
+  "page": 2,
+  "pageSize": 5
+}
+
+###
+
+### Invalid create — empty name and invalid price (expect 400)
+POST {{baseUrl}}/api/hotels
+Content-Type: application/json
+X-Api-Key: {{apiKey}}
+
+{
+  "name": "",
+  "price": -10,
+  "latitude": 45.8150,
+  "longitude": 15.9819
+}
+
+###
+
+### Invalid search — prompt without location (expect 400)
+POST {{baseUrl}}/api/hotels/search
+Content-Type: application/json
+
+{
+  "prompt": "cheap hotels under 200",
+  "page": 1,
+  "pageSize": 10
+}
